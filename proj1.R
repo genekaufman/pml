@@ -27,17 +27,16 @@ testData <- testData[,8:160];
 # the sum is zero, that indicates that there are no NA's, and therefore we want
 # to use that field
 non_na_fields <- names(testData[,colSums(is.na(testData)) == 0]);
+non_na_fields_train <- sub("problem_id","classe",non_na_fields);
 # training data's last column is classe, not problem_id
-RawDataClean <- RawData[,c(replace(non_na_fields,"problem_id","classe")];
+RawDataClean <- RawData[,c(non_na_fields_train)];
 TestDataClean <- testData[,c(non_na_fields)];
-
-
 
 set.seed(42);
 
-trainIndex = createDataPartition(y=RawData$classe,p=0.75,list=FALSE);
-training = RawData[trainIndex,];
-validation = RawData[-trainIndex,];
+trainIndex = createDataPartition(y=RawDataClean$classe,p=0.75,list=FALSE);
+training = RawDataClean[trainIndex,];
+validation = RawDataClean[-trainIndex,];
 
 print("24");
 trainFit <- train(classe~ .,data=training,method="rf",prox=TRUE);
