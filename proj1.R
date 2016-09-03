@@ -5,7 +5,8 @@
 library(caret)
 library(AppliedPredictiveModeling)
 
-rm(list = ls())
+#rm(list = ls())
+rm(list=ls()[ls()!="trainFit" & ls()!="trainFit" & ls()!="trainFit"])
 
 training_csv <- "pml-training.csv";
 #RawData <- read.csv(training_csv, colClasses = "character");
@@ -38,12 +39,40 @@ trainIndex = createDataPartition(y=RawDataClean$classe,p=0.75,list=FALSE);
 training = RawDataClean[trainIndex,];
 validation = RawDataClean[-trainIndex,];
 
-print("24");
-trainFit <- train(classe~ .,data=training,method="rf",prox=TRUE);
-print("25");
-predTrain <- predict(trainFit,validation);
-print("27");
-confusionMatrix(predTrain,validation$classe);
-print("29");
+if (!exists("trainFit")) {
+  print("generating trainFit");
+  start.time <- Sys.time()
+  trainFit <- train(classe~ .,data=training,method="rf",prox=TRUE);
+  end.time <- Sys.time()
+  time.taken <- paste( as.numeric(round(end.time - start.time,3)*1000), "milliseconds");
+  print(time.taken);
 
-names(testData)
+}
+
+if (!exists("predTrain")) {
+  print("generating predTrain");
+  predTrain.time.start <- Sys.time()
+  predTrain <- predict(trainFit,validation);
+  predTrain.time.end <- Sys.time()
+  time.taken <- paste( as.numeric(round(predTrain.time.end - predTrain.time.start,3)*1000), "milliseconds");
+  print(time.taken);
+
+}
+
+confusionMatrix(predTrain,validation$classe);
+
+predTest <- predict(trainFit,testData);
+
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+
+pml_write_files(predTest);
+
+predTest
+
+
